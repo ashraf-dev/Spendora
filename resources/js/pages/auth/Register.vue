@@ -1,39 +1,77 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
+import { Form, Head, Link } from '@inertiajs/vue3';
+import { ArrowRight, WalletCards } from '@lucide/vue';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
-import TextLink from '@/components/TextLink.vue';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import AuthRegisterLayout from '@/layouts/auth/AuthRegisterLayout.vue';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
+import type { AuthCopy, AuthLocale } from '@/types';
 
-defineProps<{
+defineOptions({ layout: AuthRegisterLayout });
+
+const props = defineProps<{
     passwordRules: string;
+    locale: AuthLocale;
+    copy: AuthCopy;
 }>();
-
-defineOptions({
-    layout: {
-        title: 'Create an account',
-        description: 'Enter your details below to create your account',
-    },
-});
 </script>
 
 <template>
-    <Head title="Register" />
-
-    <Form
-        v-bind="store.form()"
-        :reset-on-success="['password', 'password_confirmation']"
-        v-slot="{ errors, processing }"
-        class="flex flex-col gap-6"
+    <div
+        class="relative z-10 flex w-full max-w-md flex-col overflow-hidden rounded-xl border border-[#bbcabf] bg-white p-8 shadow-[0_4px_6px_-1px_rgba(15,23,42,0.05),0_2px_4px_-2px_rgba(15,23,42,0.05)]"
     >
-        <div class="grid gap-6">
-            <div class="grid gap-2">
-                <Label for="name">Name</Label>
+        <Head :title="copy.register.meta_title">
+            <meta
+                head-key="description"
+                name="description"
+                :content="copy.register.meta_description"
+            />
+            <link rel="preconnect" href="https://fonts.googleapis.com" />
+            <link
+                rel="preconnect"
+                href="https://fonts.gstatic.com"
+                crossorigin="anonymous"
+            />
+            <link
+                href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap"
+                rel="stylesheet"
+            />
+        </Head>
+
+        <div class="relative z-10 mb-8 text-center">
+            <Link
+                :href="login({ query: { locale: props.locale } })"
+                class="mb-4 inline-flex items-center gap-2 text-2xl font-bold text-[#006c49]"
+            >
+                <WalletCards class="size-7" aria-hidden="true" />
+                <span>{{ copy.common.brand }}</span>
+            </Link>
+            <h1
+                class="text-2xl leading-8 font-semibold text-[#161d19] md:text-3xl md:leading-10"
+            >
+                {{ copy.register.title }}
+            </h1>
+            <p class="mt-2 text-base leading-6 text-[#3c4a42]">
+                {{ copy.register.description }}
+            </p>
+        </div>
+
+        <Form
+            v-bind="store.form({ query: { locale: props.locale } })"
+            :reset-on-success="['password', 'password_confirmation']"
+            v-slot="{ errors, processing }"
+            class="relative z-10 flex flex-col gap-4"
+        >
+            <div class="flex flex-col gap-1">
+                <label
+                    for="name"
+                    class="text-sm leading-5 font-medium tracking-[0.01em] text-[#161d19]"
+                >
+                    {{ copy.register.name_label }}
+                </label>
                 <Input
                     id="name"
                     type="text"
@@ -42,13 +80,20 @@ defineOptions({
                     :tabindex="1"
                     autocomplete="name"
                     name="name"
-                    placeholder="Full name"
+                    :placeholder="copy.register.name_placeholder"
+                    :aria-invalid="Boolean(errors.name)"
+                    class="h-12 rounded-lg border-[#bbcabf] bg-white px-4 text-base text-[#161d19] shadow-none placeholder:text-[#6c7a71] focus-visible:border-[#006c49] focus-visible:ring-1 focus-visible:ring-[#006c49]"
                 />
                 <InputError :message="errors.name" />
             </div>
 
-            <div class="grid gap-2">
-                <Label for="email">Email address</Label>
+            <div class="flex flex-col gap-1">
+                <label
+                    for="email"
+                    class="text-sm leading-5 font-medium tracking-[0.01em] text-[#161d19]"
+                >
+                    {{ copy.register.email_label }}
+                </label>
                 <Input
                     id="email"
                     type="email"
@@ -56,59 +101,96 @@ defineOptions({
                     :tabindex="2"
                     autocomplete="email"
                     name="email"
-                    placeholder="email@example.com"
+                    :placeholder="copy.register.email_placeholder"
+                    :aria-invalid="Boolean(errors.email)"
+                    class="h-12 rounded-lg border-[#bbcabf] bg-white px-4 text-base text-[#161d19] shadow-none placeholder:text-[#6c7a71] focus-visible:border-[#006c49] focus-visible:ring-1 focus-visible:ring-[#006c49]"
                 />
                 <InputError :message="errors.email" />
             </div>
 
-            <div class="grid gap-2">
-                <Label for="password">Password</Label>
+            <div class="flex flex-col gap-1">
+                <label
+                    for="password"
+                    class="text-sm leading-5 font-medium tracking-[0.01em] text-[#161d19]"
+                >
+                    {{ copy.register.password_label }}
+                </label>
                 <PasswordInput
                     id="password"
                     required
                     :tabindex="3"
                     autocomplete="new-password"
                     name="password"
-                    placeholder="Password"
+                    :placeholder="copy.register.password_placeholder"
                     :passwordrules="passwordRules"
+                    :show-password-label="copy.common.show_password"
+                    :hide-password-label="copy.common.hide_password"
+                    :aria-invalid="Boolean(errors.password)"
+                    class="h-12 rounded-lg border-[#bbcabf] bg-white px-4 text-base text-[#161d19] shadow-none placeholder:text-[#6c7a71] focus-visible:border-[#006c49] focus-visible:ring-1 focus-visible:ring-[#006c49]"
                 />
                 <InputError :message="errors.password" />
             </div>
 
-            <div class="grid gap-2">
-                <Label for="password_confirmation">Confirm password</Label>
+            <div class="flex flex-col gap-1">
+                <label
+                    for="password_confirmation"
+                    class="text-sm leading-5 font-medium tracking-[0.01em] text-[#161d19]"
+                >
+                    {{ copy.register.password_confirmation_label }}
+                </label>
                 <PasswordInput
                     id="password_confirmation"
                     required
                     :tabindex="4"
                     autocomplete="new-password"
                     name="password_confirmation"
-                    placeholder="Confirm password"
+                    :placeholder="
+                        copy.register.password_confirmation_placeholder
+                    "
                     :passwordrules="passwordRules"
+                    :show-password-label="copy.common.show_password"
+                    :hide-password-label="copy.common.hide_password"
+                    :aria-invalid="Boolean(errors.password_confirmation)"
+                    class="h-12 rounded-lg border-[#bbcabf] bg-white px-4 text-base text-[#161d19] shadow-none placeholder:text-[#6c7a71] focus-visible:border-[#006c49] focus-visible:ring-1 focus-visible:ring-[#006c49]"
                 />
                 <InputError :message="errors.password_confirmation" />
             </div>
 
-            <Button
+            <button
                 type="submit"
-                class="mt-2 w-full"
+                class="group mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#006c49] px-6 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:bg-[#005b3e] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60"
                 tabindex="5"
                 :disabled="processing"
                 data-test="register-user-button"
             >
                 <Spinner v-if="processing" />
-                Create account
-            </Button>
-        </div>
+                <template v-else>
+                    <span>{{ copy.register.submit }}</span>
+                    <ArrowRight
+                        class="size-4 -translate-x-2 opacity-0 transition duration-200 group-hover:translate-x-0 group-hover:opacity-100"
+                        :class="{ 'rotate-180': locale === 'ar' }"
+                        aria-hidden="true"
+                    />
+                </template>
+            </button>
+        </Form>
 
-        <div class="text-center text-sm text-muted-foreground">
-            Already have an account?
-            <TextLink
-                :href="login()"
-                class="underline underline-offset-4"
+        <p class="relative z-10 mt-8 text-center text-base text-[#3c4a42]">
+            {{ copy.register.has_account }}
+            <Link
+                :href="login({ query: { locale: props.locale } })"
+                class="font-medium text-[#006c49] transition-colors hover:text-[#10b981] hover:underline"
                 :tabindex="6"
-                >Log in</TextLink
             >
-        </div>
-    </Form>
+                {{ copy.register.login }}
+            </Link>
+        </p>
+
+        <img
+            src="/images/spendora-register-decoration.png"
+            alt=""
+            class="pointer-events-none absolute -end-24 -bottom-24 size-64 rotate-12 rounded-full object-cover opacity-[0.03]"
+            aria-hidden="true"
+        />
+    </div>
 </template>

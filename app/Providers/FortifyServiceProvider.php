@@ -6,6 +6,7 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -49,6 +50,7 @@ class FortifyServiceProvider extends ServiceProvider
     private function configureViews(): void
     {
         Fortify::loginView(fn (Request $request) => Inertia::render('auth/Login', [
+            ...$this->authPageProps(),
             'canResetPassword' => Features::enabled(Features::resetPasswords()),
             'status' => $request->session()->get('status'),
         ]));
@@ -68,10 +70,27 @@ class FortifyServiceProvider extends ServiceProvider
         ]));
 
         Fortify::registerView(fn () => Inertia::render('auth/Register', [
+            ...$this->authPageProps(),
             'passwordRules' => Password::defaults()->toPasswordRulesString(),
         ]));
 
         Fortify::confirmPasswordView(fn () => Inertia::render('auth/ConfirmPassword'));
+    }
+
+    /**
+     * @return array{locale: string, copy: array<string, mixed>}
+     */
+    private function authPageProps(): array
+    {
+        $copy = __('auth');
+        $copy['common']['copyright'] = __('auth.common.copyright', [
+            'year' => now()->year,
+        ]);
+
+        return [
+            'locale' => App::currentLocale(),
+            'copy' => $copy,
+        ];
     }
 
     /**

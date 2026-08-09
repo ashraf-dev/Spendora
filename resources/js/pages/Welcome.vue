@@ -43,7 +43,9 @@ const fontClass = computed(() =>
     isArabic.value ? "font-['Noto_Kufi_Arabic']" : "font-['Inter']",
 );
 const primaryDestination = computed(() =>
-    page.props.auth.user ? dashboard() : register(),
+    page.props.auth.user
+        ? dashboard()
+        : register({ query: { locale: props.locale } }),
 );
 const headerAction = computed(() =>
     page.props.auth.user
@@ -168,7 +170,7 @@ const benefitIcons = [Zap, ChartNoAxesCombined, MonitorSmartphone];
                     >
                     <Link
                         v-else
-                        :href="login()"
+                        :href="login({ query: { locale: props.locale } })"
                         class="hidden text-[#3c4a42] hover:text-[#006c49] lg:block"
                         >{{ copy.navigation.login }}</Link
                     >

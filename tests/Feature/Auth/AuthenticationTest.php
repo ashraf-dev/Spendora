@@ -2,12 +2,33 @@
 
 use App\Models\User;
 use Illuminate\Support\Facades\RateLimiter;
+use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
 
 test('login screen can be rendered', function () {
     $response = $this->get(route('login'));
 
-    $response->assertOk();
+    $response
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('auth/Login')
+            ->has('canResetPassword')
+            ->where('locale', 'en')
+            ->where('copy.login.title', 'Log in to your account')
+        );
+});
+
+test('login screen can be rendered in arabic', function () {
+    $this->get(route('login', ['locale' => 'ar']))
+        ->assertOk()
+        ->assertSee('lang="ar"', false)
+        ->assertSee('dir="rtl"', false)
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('auth/Login')
+            ->where('locale', 'ar')
+            ->where('copy.login.title', 'تسجيل الدخول إلى حسابك')
+            ->where('copy.login.submit', 'تسجيل الدخول')
+        );
 });
 
 test('users can authenticate using the login screen', function () {
