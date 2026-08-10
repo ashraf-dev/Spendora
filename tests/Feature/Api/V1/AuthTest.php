@@ -3,6 +3,7 @@
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Passport\Client;
+use Laravel\Passport\Passport;
 
 beforeEach(function () {
     Client::factory()->asPersonalAccessTokenClient()->create([
@@ -79,6 +80,18 @@ test('login fails with incorrect credentials', function () {
 
 test('protected routes reject unauthenticated requests', function () {
     $this->getJson('/api/v1/auth/user')->assertUnauthorized();
+});
+
+test('authenticated user endpoint returns the current user', function () {
+    $user = User::factory()->create();
+
+    Passport::actingAs($user);
+
+    $this->getJson('/api/v1/auth/user')
+        ->assertOk()
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('data.id', $user->id)
+        ->assertJsonPath('data.email', $user->email);
 });
 
 test('logout revokes the current token', function () {
