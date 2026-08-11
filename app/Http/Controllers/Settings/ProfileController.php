@@ -5,10 +5,13 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileDeleteRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Http\Requests\Settings\UpdateLanguageRequest;
+use App\Http\Requests\Settings\UploadAvatarRequest;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -39,6 +42,59 @@ class ProfileController extends Controller
         $request->user()->save();
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Profile updated.')]);
+
+        return to_route('profile.edit');
+    }
+
+    public function updateLanguage(UpdateLanguageRequest $request): RedirectResponse
+    {
+        $user = $request->user();
+        $user->forceFill([
+            'language' => $request->validated('language'),
+        ])->save();
+
+        app()->setLocale($user->language);
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => __('Language updated.'),
+        ]);
+
+        return to_route('profile.edit');
+    }
+
+    public function uploadAvatar(UploadAvatarRequest $request): RedirectResponse
+    {
+        $user = $request->user();
+        $path = $request->file('avatar')->store('avatars', 'public');
+
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        $user->forceFill(['avatar' => $path])->save();
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => __('Avatar updated.'),
+        ]);
+
+        return to_route('profile.edit');
+    }
+
+    public function deleteAvatar(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
+            $user->forceFill(['avatar' => null])->save();
+        }
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => __('Avatar removed.'),
+        ]);
 
         return to_route('profile.edit');
     }

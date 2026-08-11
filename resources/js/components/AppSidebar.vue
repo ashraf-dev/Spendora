@@ -1,65 +1,150 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, FolderGit2, LayoutGrid } from '@lucide/vue';
-import AppLogo from '@/components/AppLogo.vue';
-import NavFooter from '@/components/NavFooter.vue';
-import NavMain from '@/components/NavMain.vue';
-import NavUser from '@/components/NavUser.vue';
+import {
+    CalendarDays,
+    ChartColumn,
+    CircleHelp,
+    LayoutDashboard,
+    LogOut,
+    Tags,
+    UserRound,
+} from '@lucide/vue';
 import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
     SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
-import type { NavItem } from '@/types';
+import { useCurrentUrl } from '@/composables/useCurrentUrl';
+import { analytics, dashboard, logout } from '@/routes';
+import { index as categoriesIndex } from '@/routes/categories';
+import { index as expensesIndex } from '@/routes/expenses';
+import { edit as profileEdit } from '@/routes/profile';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-];
+const { isCurrentOrParentUrl, isCurrentUrl } = useCurrentUrl();
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
-    },
-];
+const navigationItemClass =
+    'flex min-h-12 items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 active:translate-x-1';
 </script>
 
 <template>
-    <Sidebar collapsible="icon" variant="inset">
-        <SidebarHeader>
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard()">
-                            <AppLogo />
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-            </SidebarMenu>
+    <Sidebar
+        collapsible="offcanvas"
+        variant="sidebar"
+        class="border-r border-[#bbcabf] bg-[#e8f0e9] [--sidebar-background:#e8f0e9] [--sidebar-foreground:#3c4a42]"
+    >
+        <SidebarHeader class="gap-0 bg-[#e8f0e9] px-6 pt-8 pb-10">
+            <Link :href="dashboard()" class="flex items-center gap-3">
+                <span
+                    class="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#006c49] text-2xl font-semibold text-white shadow-sm"
+                    aria-hidden="true"
+                >
+                    S
+                </span>
+                <span class="min-w-0">
+                    <span
+                        class="block truncate text-xl font-bold tracking-tight text-[#006c49]"
+                    >
+                        Spendora
+                    </span>
+                    <span
+                        class="block truncate text-xs font-semibold text-[#565e74]"
+                    >
+                        Wise Companion
+                    </span>
+                </span>
+            </Link>
         </SidebarHeader>
 
-        <SidebarContent>
-            <NavMain :items="mainNavItems" />
+        <SidebarContent class="gap-0 bg-[#e8f0e9] px-6">
+            <nav aria-label="Primary navigation" class="flex flex-col gap-2">
+                <Link
+                    :href="dashboard()"
+                    :class="[
+                        navigationItemClass,
+                        isCurrentUrl(dashboard())
+                            ? 'bg-[#10b981] font-bold text-[#00422b] shadow-sm'
+                            : 'text-[#3c4a42] hover:bg-[#dde4dd]',
+                    ]"
+                >
+                    <LayoutDashboard class="size-5 shrink-0" />
+                    <span>Home</span>
+                </Link>
+
+                <Link
+                    :href="expensesIndex()"
+                    :class="[
+                        navigationItemClass,
+                        isCurrentOrParentUrl(expensesIndex())
+                            ? 'bg-[#10b981] font-bold text-[#00422b] shadow-sm'
+                            : 'text-[#3c4a42] hover:bg-[#dde4dd]',
+                    ]"
+                >
+                    <CalendarDays class="size-5 shrink-0" />
+                    <span>Expenses</span>
+                </Link>
+
+                <Link
+                    :href="categoriesIndex()"
+                    :class="[
+                        navigationItemClass,
+                        isCurrentOrParentUrl(categoriesIndex())
+                            ? 'bg-[#10b981] font-bold text-[#00422b] shadow-sm'
+                            : 'text-[#3c4a42] hover:bg-[#dde4dd]',
+                    ]"
+                >
+                    <Tags class="size-5 shrink-0" />
+                    <span>Categories</span>
+                </Link>
+
+                <Link
+                    :href="analytics()"
+                    :class="[
+                        navigationItemClass,
+                        isCurrentOrParentUrl(analytics())
+                            ? 'bg-[#10b981] font-bold text-[#00422b] shadow-sm'
+                            : 'text-[#3c4a42] hover:bg-[#dde4dd]',
+                    ]"
+                >
+                    <ChartColumn class="size-5 shrink-0" />
+                    <span>Analytics</span>
+                </Link>
+
+                <Link
+                    :href="profileEdit()"
+                    :class="[
+                        navigationItemClass,
+                        isCurrentOrParentUrl(profileEdit())
+                            ? 'bg-[#10b981] font-bold text-[#00422b] shadow-sm'
+                            : 'text-[#3c4a42] hover:bg-[#dde4dd]',
+                    ]"
+                >
+                    <UserRound class="size-5 shrink-0" />
+                    <span>Profile</span>
+                </Link>
+            </nav>
         </SidebarContent>
 
-        <SidebarFooter>
-            <NavFooter :items="footerNavItems" />
-            <NavUser />
+        <SidebarFooter class="gap-6 bg-[#e8f0e9] px-6 pt-6 pb-8">
+            <div class="flex flex-col gap-1 border-t border-[#bbcabf] pt-6">
+                <button
+                    type="button"
+                    class="flex items-center gap-3 rounded-lg px-4 py-2 text-left text-xs font-semibold text-[#3c4a42] transition-colors hover:bg-[#dde4dd] hover:text-[#006c49]"
+                >
+                    <CircleHelp class="size-4" />
+                    <span>Help</span>
+                </button>
+
+                <Link
+                    :href="logout()"
+                    method="post"
+                    as="button"
+                    class="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-left text-xs font-semibold text-[#3c4a42] transition-colors hover:bg-[#dde4dd] hover:text-[#006c49]"
+                >
+                    <LogOut class="size-4" />
+                    <span>Logout</span>
+                </Link>
+            </div>
         </SidebarFooter>
     </Sidebar>
     <slot />
