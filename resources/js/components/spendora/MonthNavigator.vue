@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import { ChevronLeft, ChevronRight } from '@lucide/vue';
+import { useTranslations } from '@/composables/useTranslations';
 import { monthLabel } from '@/lib/format';
 import type { MonthNavigation } from '@/types/spendora';
 
@@ -10,6 +11,7 @@ const props = defineProps<{
     navigation: MonthNavigation;
     baseUrl: string;
 }>();
+const { t } = useTranslations();
 
 function hrefFor(target: { month: number; year: number }): string {
     const url = new URL(props.baseUrl, window.location.origin);
@@ -28,7 +30,7 @@ function hrefFor(target: { month: number; year: number }): string {
             :href="hrefFor(navigation.previous_month)"
             class="inline-flex size-9 items-center justify-center rounded-lg text-[#006c49] transition hover:bg-[#eef6ee]"
             preserve-scroll
-            :aria-label="`Previous month`"
+            :aria-label="t('common.previous_month')"
         >
             <ChevronLeft class="size-5" />
         </Link>
@@ -41,7 +43,7 @@ function hrefFor(target: { month: number; year: number }): string {
             :href="hrefFor(navigation.next_month)"
             class="inline-flex size-9 items-center justify-center rounded-lg text-[#006c49] transition hover:bg-[#eef6ee]"
             preserve-scroll
-            :aria-label="`Next month`"
+            :aria-label="t('common.next_month')"
         >
             <ChevronRight class="size-5" />
         </Link>

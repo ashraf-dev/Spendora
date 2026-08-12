@@ -14,23 +14,14 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { useTranslations } from '@/composables/useTranslations';
 import { formatMoney } from '@/lib/format';
+import { create, destroy, edit, index } from '@/routes/expenses';
 import type {
     CategoryPayload,
     ExpensePayload,
     PaginatedExpenses,
 } from '@/types/spendora';
-
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            {
-                title: 'Expenses',
-                href: '/expenses',
-            },
-        ],
-    },
-});
 
 const props = defineProps<{
     expenses: PaginatedExpenses;
@@ -57,6 +48,7 @@ const month = ref(props.filters.month ? String(props.filters.month) : '');
 const year = ref(props.filters.year ? String(props.filters.year) : '');
 const expenseToDelete = ref<ExpensePayload | null>(null);
 const deleteDialogOpen = ref(false);
+const { t } = useTranslations();
 
 watch(
     () => props.filters,
@@ -98,7 +90,7 @@ function closeDeleteDialog(): void {
 
 function applyFilters(): void {
     router.get(
-        '/expenses',
+        index.url(),
         {
             search: search.value || undefined,
             category_id: categoryId.value || undefined,
@@ -117,7 +109,7 @@ function applyFilters(): void {
 
 function goToPage(page: number): void {
     router.get(
-        '/expenses',
+        index.url(),
         {
             ...Object.fromEntries(
                 Object.entries({
@@ -138,22 +130,26 @@ function goToPage(page: number): void {
 </script>
 
 <template>
-    <Head title="Expenses" />
+    <Head :title="t('expenses.title')" />
 
     <div class="flex flex-1 flex-col gap-6 p-4 md:p-6">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div
+            class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        >
             <div>
-                <h1 class="text-2xl font-semibold text-[#161d19]">Expenses</h1>
+                <h1 class="text-2xl font-semibold text-[#161d19]">
+                    {{ t('expenses.title') }}
+                </h1>
                 <p class="mt-1 text-sm text-[#3c4a42]">
-                    Browse, filter, and manage your expense history.
+                    {{ t('expenses.subtitle') }}
                 </p>
             </div>
             <Link
-                href="/expenses/create"
+                :href="create()"
                 class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#006c49] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#00422b]"
             >
                 <Plus class="size-4" />
-                Add expense
+                {{ t('common.add_expense') }}
             </Link>
         </div>
 
@@ -162,25 +158,25 @@ function goToPage(page: number): void {
             @submit.prevent="applyFilters"
         >
             <div class="md:col-span-2">
-                <label class="mb-1 block text-sm font-medium text-[#161d19]"
-                    >Search</label
-                >
+                <label class="mb-1 block text-sm font-medium text-[#161d19]">{{
+                    t('common.search')
+                }}</label>
                 <Input
                     v-model="search"
                     type="search"
-                    placeholder="Search description"
+                    :placeholder="t('expenses.search_placeholder')"
                     class="h-11 border-[#bbcabf]"
                 />
             </div>
             <div>
-                <label class="mb-1 block text-sm font-medium text-[#161d19]"
-                    >Category</label
-                >
+                <label class="mb-1 block text-sm font-medium text-[#161d19]">{{
+                    t('common.category')
+                }}</label>
                 <select
                     v-model="categoryId"
                     class="flex h-11 w-full rounded-lg border border-[#bbcabf] bg-white px-3 text-sm text-[#161d19]"
                 >
-                    <option value="">All categories</option>
+                    <option value="">{{ t('expenses.all_categories') }}</option>
                     <option
                         v-for="category in categories"
                         :key="category.id"
@@ -192,28 +188,30 @@ function goToPage(page: number): void {
             </div>
             <div class="grid grid-cols-2 gap-2">
                 <div>
-                    <label class="mb-1 block text-sm font-medium text-[#161d19]"
-                        >Month</label
+                    <label
+                        class="mb-1 block text-sm font-medium text-[#161d19]"
+                        >{{ t('expenses.month') }}</label
                     >
                     <Input
                         v-model="month"
                         type="number"
                         min="1"
                         max="12"
-                        placeholder="MM"
+                        :placeholder="t('expenses.month_placeholder')"
                         class="h-11 border-[#bbcabf]"
                     />
                 </div>
                 <div>
-                    <label class="mb-1 block text-sm font-medium text-[#161d19]"
-                        >Year</label
+                    <label
+                        class="mb-1 block text-sm font-medium text-[#161d19]"
+                        >{{ t('expenses.year') }}</label
                     >
                     <Input
                         v-model="year"
                         type="number"
                         min="2000"
                         max="2100"
-                        placeholder="YYYY"
+                        :placeholder="t('expenses.year_placeholder')"
                         class="h-11 border-[#bbcabf]"
                     />
                 </div>
@@ -223,21 +221,21 @@ function goToPage(page: number): void {
                     type="submit"
                     class="rounded-lg bg-[#006c49] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#00422b]"
                 >
-                    Apply filters
+                    {{ t('expenses.apply_filters') }}
                 </button>
             </div>
         </form>
 
         <EmptyState
             v-if="!hasExpenses"
-            title="No expenses found"
-            description="Try adjusting filters or add a new expense."
+            :title="t('expenses.empty')"
+            :description="t('expenses.empty_description')"
         >
             <Link
-                href="/expenses/create"
+                :href="create()"
                 class="inline-flex rounded-lg bg-[#006c49] px-4 py-2 text-sm font-semibold text-white"
             >
-                Add expense
+                {{ t('common.add_expense') }}
             </Link>
         </EmptyState>
 
@@ -246,17 +244,23 @@ function goToPage(page: number): void {
             class="overflow-hidden rounded-xl border border-[#bbcabf] bg-white"
         >
             <div class="overflow-x-auto">
-                <table class="min-w-full text-left text-sm">
+                <table class="min-w-full text-start text-sm">
                     <thead class="bg-[#eef6ee] text-[#3c4a42]">
                         <tr>
-                            <th class="px-4 py-3 font-medium">Date</th>
-                            <th class="px-4 py-3 font-medium">Category</th>
-                            <th class="px-4 py-3 font-medium">Description</th>
-                            <th class="px-4 py-3 font-medium text-end">
-                                Amount
+                            <th class="px-4 py-3 font-medium">
+                                {{ t('common.date') }}
                             </th>
-                            <th class="px-4 py-3 font-medium text-end">
-                                Actions
+                            <th class="px-4 py-3 font-medium">
+                                {{ t('common.category') }}
+                            </th>
+                            <th class="px-4 py-3 font-medium">
+                                {{ t('common.description') }}
+                            </th>
+                            <th class="px-4 py-3 text-end font-medium">
+                                {{ t('common.amount') }}
+                            </th>
+                            <th class="px-4 py-3 text-end font-medium">
+                                {{ t('common.actions') }}
                             </th>
                         </tr>
                     </thead>
@@ -266,7 +270,7 @@ function goToPage(page: number): void {
                             :key="expense.id"
                             class="text-[#161d19]"
                         >
-                            <td class="whitespace-nowrap px-4 py-3">
+                            <td class="px-4 py-3 whitespace-nowrap">
                                 {{ expense.expense_date }}
                             </td>
                             <td class="px-4 py-3">
@@ -276,7 +280,7 @@ function goToPage(page: number): void {
                                 {{ expense.description || '—' }}
                             </td>
                             <td
-                                class="whitespace-nowrap px-4 py-3 text-end font-semibold"
+                                class="px-4 py-3 text-end font-semibold whitespace-nowrap"
                             >
                                 {{ formatMoney(expense.amount) }}
                             </td>
@@ -285,16 +289,24 @@ function goToPage(page: number): void {
                                     class="flex items-center justify-end gap-2"
                                 >
                                     <Link
-                                        :href="`/expenses/${expense.id}/edit`"
+                                        :href="edit(expense)"
                                         class="inline-flex size-8 items-center justify-center rounded-lg text-[#006c49] hover:bg-[#eef6ee]"
-                                        :aria-label="`Edit expense ${expense.id}`"
+                                        :aria-label="
+                                            t('expenses.edit_aria', {
+                                                id: expense.id,
+                                            })
+                                        "
                                     >
                                         <Pencil class="size-4" />
                                     </Link>
                                     <button
                                         type="button"
                                         class="inline-flex size-8 items-center justify-center rounded-lg text-red-600 hover:bg-red-50"
-                                        :aria-label="`Delete expense ${expense.id}`"
+                                        :aria-label="
+                                            t('expenses.delete_aria', {
+                                                id: expense.id,
+                                            })
+                                        "
                                         data-test="delete-expense-button"
                                         @click="askDeleteExpense(expense)"
                                     >
@@ -310,10 +322,10 @@ function goToPage(page: number): void {
                                 class="px-4 py-3 text-end font-semibold"
                                 colspan="3"
                             >
-                                Total
+                                {{ t('common.total') }}
                             </td>
                             <td
-                                class="whitespace-nowrap px-4 py-3 text-end font-semibold"
+                                class="px-4 py-3 text-end font-semibold whitespace-nowrap"
                             >
                                 {{ formatMoney(total_amount) }}
                             </td>
@@ -328,9 +340,13 @@ function goToPage(page: number): void {
                 class="flex items-center justify-between border-t border-[#bbcabf] px-4 py-3 text-sm text-[#3c4a42]"
             >
                 <p>
-                    Page {{ expenses.meta.current_page }} of
-                    {{ expenses.meta.last_page }}
-                    · {{ expenses.meta.total }} total
+                    {{
+                        t('expenses.page_summary', {
+                            current: expenses.meta.current_page,
+                            last: expenses.meta.last_page,
+                            total: expenses.meta.total,
+                        })
+                    }}
                 </p>
                 <div class="flex gap-2">
                     <button
@@ -339,7 +355,7 @@ function goToPage(page: number): void {
                         :disabled="expenses.meta.current_page <= 1"
                         @click="goToPage(expenses.meta.current_page - 1)"
                     >
-                        Previous
+                        {{ t('common.previous') }}
                     </button>
                     <button
                         type="button"
@@ -350,7 +366,7 @@ function goToPage(page: number): void {
                         "
                         @click="goToPage(expenses.meta.current_page + 1)"
                     >
-                        Next
+                        {{ t('common.next') }}
                     </button>
                 </div>
             </div>
@@ -359,30 +375,31 @@ function goToPage(page: number): void {
         <Dialog
             :open="deleteDialogOpen"
             @update:open="
-                (open) => (open ? (deleteDialogOpen = true) : closeDeleteDialog())
+                (open) =>
+                    open ? (deleteDialogOpen = true) : closeDeleteDialog()
             "
         >
             <DialogContent>
                 <Form
                     v-if="expenseToDelete"
-                    :action="`/expenses/${expenseToDelete.id}`"
-                    method="delete"
+                    v-bind="destroy.form(expenseToDelete)"
                     class="space-y-6"
                     v-slot="{ processing }"
                     @success="closeDeleteDialog"
                 >
                     <DialogHeader class="space-y-3">
-                        <DialogTitle>Delete this expense?</DialogTitle>
+                        <DialogTitle>{{
+                            t('expenses.delete_title')
+                        }}</DialogTitle>
                         <DialogDescription>
-                            This will permanently delete
-                            <span class="font-medium text-[#161d19]">
-                                {{
-                                    expenseToDelete.description ||
-                                    categoryName(expenseToDelete)
-                                }}
-                            </span>
-                            ({{ formatMoney(expenseToDelete.amount) }}). This
-                            action cannot be undone.
+                            {{
+                                t('expenses.delete_description', {
+                                    expense:
+                                        expenseToDelete.description ||
+                                        categoryName(expenseToDelete),
+                                    amount: formatMoney(expenseToDelete.amount),
+                                })
+                            }}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -393,7 +410,7 @@ function goToPage(page: number): void {
                                 variant="secondary"
                                 :disabled="processing"
                             >
-                                Cancel
+                                {{ t('common.cancel') }}
                             </Button>
                         </DialogClose>
                         <Button
@@ -402,7 +419,11 @@ function goToPage(page: number): void {
                             :disabled="processing"
                             data-test="confirm-delete-expense-button"
                         >
-                            {{ processing ? 'Deleting...' : 'Delete expense' }}
+                            {{
+                                processing
+                                    ? t('expenses.deleting')
+                                    : t('expenses.delete')
+                            }}
                         </Button>
                     </DialogFooter>
                 </Form>

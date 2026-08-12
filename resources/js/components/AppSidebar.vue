@@ -16,12 +16,14 @@ import {
     SidebarHeader,
 } from '@/components/ui/sidebar';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
+import { useTranslations } from '@/composables/useTranslations';
 import { analytics, dashboard, logout } from '@/routes';
 import { index as categoriesIndex } from '@/routes/categories';
 import { index as expensesIndex } from '@/routes/expenses';
 import { edit as profileEdit } from '@/routes/profile';
 
 const { isCurrentOrParentUrl, isCurrentUrl } = useCurrentUrl();
+const { locale, t } = useTranslations();
 
 const navigationItemClass =
     'flex min-h-12 items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 active:translate-x-1';
@@ -29,9 +31,10 @@ const navigationItemClass =
 
 <template>
     <Sidebar
+        :side="locale === 'ar' ? 'right' : 'left'"
         collapsible="offcanvas"
         variant="sidebar"
-        class="border-r border-[#bbcabf] bg-[#e8f0e9] [--sidebar-background:#e8f0e9] [--sidebar-foreground:#3c4a42]"
+        class="border-e border-[#bbcabf] bg-[#e8f0e9] [--sidebar-background:#e8f0e9] [--sidebar-foreground:#3c4a42]"
     >
         <SidebarHeader class="gap-0 bg-[#e8f0e9] px-6 pt-8 pb-10">
             <Link :href="dashboard()" class="flex items-center gap-3">
@@ -45,19 +48,22 @@ const navigationItemClass =
                     <span
                         class="block truncate text-xl font-bold tracking-tight text-[#006c49]"
                     >
-                        Spendora
+                        {{ t('brand.name') }}
                     </span>
                     <span
                         class="block truncate text-xs font-semibold text-[#565e74]"
                     >
-                        Wise Companion
+                        {{ t('brand.tagline') }}
                     </span>
                 </span>
             </Link>
         </SidebarHeader>
 
         <SidebarContent class="gap-0 bg-[#e8f0e9] px-6">
-            <nav aria-label="Primary navigation" class="flex flex-col gap-2">
+            <nav
+                :aria-label="t('navigation.primary')"
+                class="flex flex-col gap-2"
+            >
                 <Link
                     :href="dashboard()"
                     :class="[
@@ -68,7 +74,7 @@ const navigationItemClass =
                     ]"
                 >
                     <LayoutDashboard class="size-5 shrink-0" />
-                    <span>Home</span>
+                    <span>{{ t('navigation.home') }}</span>
                 </Link>
 
                 <Link
@@ -81,7 +87,7 @@ const navigationItemClass =
                     ]"
                 >
                     <CalendarDays class="size-5 shrink-0" />
-                    <span>Expenses</span>
+                    <span>{{ t('navigation.expenses') }}</span>
                 </Link>
 
                 <Link
@@ -94,7 +100,7 @@ const navigationItemClass =
                     ]"
                 >
                     <Tags class="size-5 shrink-0" />
-                    <span>Categories</span>
+                    <span>{{ t('navigation.categories') }}</span>
                 </Link>
 
                 <Link
@@ -107,7 +113,7 @@ const navigationItemClass =
                     ]"
                 >
                     <ChartColumn class="size-5 shrink-0" />
-                    <span>Analytics</span>
+                    <span>{{ t('navigation.analytics') }}</span>
                 </Link>
 
                 <Link
@@ -120,7 +126,7 @@ const navigationItemClass =
                     ]"
                 >
                     <UserRound class="size-5 shrink-0" />
-                    <span>Profile</span>
+                    <span>{{ t('navigation.profile') }}</span>
                 </Link>
             </nav>
         </SidebarContent>
@@ -129,20 +135,20 @@ const navigationItemClass =
             <div class="flex flex-col gap-1 border-t border-[#bbcabf] pt-6">
                 <button
                     type="button"
-                    class="flex items-center gap-3 rounded-lg px-4 py-2 text-left text-xs font-semibold text-[#3c4a42] transition-colors hover:bg-[#dde4dd] hover:text-[#006c49]"
+                    class="flex items-center gap-3 rounded-lg px-4 py-2 text-start text-xs font-semibold text-[#3c4a42] transition-colors hover:bg-[#dde4dd] hover:text-[#006c49]"
                 >
                     <CircleHelp class="size-4" />
-                    <span>Help</span>
+                    <span>{{ t('navigation.help') }}</span>
                 </button>
 
                 <Link
                     :href="logout()"
                     method="post"
                     as="button"
-                    class="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-left text-xs font-semibold text-[#3c4a42] transition-colors hover:bg-[#dde4dd] hover:text-[#006c49]"
+                    class="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-start text-xs font-semibold text-[#3c4a42] transition-colors hover:bg-[#dde4dd] hover:text-[#006c49]"
                 >
                     <LogOut class="size-4" />
-                    <span>Logout</span>
+                    <span>{{ t('navigation.logout') }}</span>
                 </Link>
             </div>
         </SidebarFooter>

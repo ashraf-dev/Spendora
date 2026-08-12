@@ -12,6 +12,15 @@ test('the english welcome page is the default', function () {
         );
 });
 
+test('the browser shell uses Spendora branding', function () {
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertSee('<title>Spendora</title>', false)
+        ->assertSee('href="/favicon.ico?v=2"', false)
+        ->assertSee('href="/favicon.svg?v=2"', false)
+        ->assertSee('href="/apple-touch-icon.png?v=2"', false);
+});
+
 test('the arabic welcome page uses arabic translations and direction', function () {
     $this->get(route('home', ['locale' => 'ar']))
         ->assertOk()

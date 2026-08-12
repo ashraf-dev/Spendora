@@ -20,6 +20,7 @@ import EmptyState from '@/components/spendora/EmptyState.vue';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useInitials } from '@/composables/useInitials';
+import { useTranslations } from '@/composables/useTranslations';
 import { formatMoney, formatPercent, monthLabel } from '@/lib/format';
 import {
     index as categoriesIndex,
@@ -29,7 +30,6 @@ import type { CategoryTotalRow, MonthNavigation } from '@/types/spendora';
 
 defineOptions({
     layout: {
-        breadcrumbs: [{ title: 'Categories', href: categoriesIndex() }],
         hideHeader: true,
     },
 });
@@ -44,6 +44,7 @@ const props = defineProps<{
 
 const page = usePage();
 const { getInitials } = useInitials();
+const { locale, t } = useTranslations();
 const showSpentCategoriesOnly = ref(false);
 const selectedCategoryId = ref(
     props.categories.find((row) => Number(row.total_amount) > 0)?.category.id ??
@@ -109,7 +110,7 @@ function styleFor(index: number) {
 }
 
 function formatExpenseDate(date: string): string {
-    return new Intl.DateTimeFormat(undefined, {
+    return new Intl.DateTimeFormat(locale.value, {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -118,7 +119,7 @@ function formatExpenseDate(date: string): string {
 </script>
 
 <template>
-    <Head title="Categories" />
+    <Head :title="t('categories.title')" />
 
     <div class="min-h-full flex-1 bg-[#f4fbf4] font-sans text-[#161d19]">
         <header
@@ -137,7 +138,7 @@ function formatExpenseDate(date: string): string {
                         "
                         class="flex size-8 items-center justify-center rounded-full text-xl text-[#161d19] transition-colors hover:bg-[#dde4dd]"
                         preserve-scroll
-                        aria-label="Previous month"
+                        :aria-label="t('common.previous_month')"
                     >
                         ‹
                     </Link>
@@ -152,7 +153,7 @@ function formatExpenseDate(date: string): string {
                         "
                         class="flex size-8 items-center justify-center rounded-full text-xl text-[#161d19] transition-colors hover:bg-[#dde4dd]"
                         preserve-scroll
-                        aria-label="Next month"
+                        :aria-label="t('common.next_month')"
                     >
                         ›
                     </Link>
@@ -160,9 +161,9 @@ function formatExpenseDate(date: string): string {
             </div>
 
             <div class="flex shrink-0 items-center gap-3 md:gap-6">
-                <div class="hidden text-right sm:block">
+                <div class="hidden text-end sm:block">
                     <p class="text-xs font-semibold text-[#565e74]">
-                        Total Spent
+                        {{ t('categories.total_spent') }}
                     </p>
                     <p class="text-lg font-bold md:text-2xl">
                         {{ formatMoney(month_total) }}
@@ -173,18 +174,18 @@ function formatExpenseDate(date: string): string {
                     <button
                         type="button"
                         class="hidden size-10 items-center justify-center rounded-full bg-[#e8f0e9] transition-colors hover:bg-[#dde4dd] sm:flex"
-                        aria-label="Search"
+                        :aria-label="t('common.search')"
                     >
                         <Search class="size-5" />
                     </button>
                     <button
                         type="button"
                         class="relative flex size-10 items-center justify-center rounded-full bg-[#e8f0e9] transition-colors hover:bg-[#dde4dd]"
-                        aria-label="Notifications"
+                        :aria-label="t('common.notifications')"
                     >
                         <Bell class="size-5" />
                         <span
-                            class="absolute top-2 right-2 size-2 rounded-full bg-[#ba1a1a]"
+                            class="absolute end-2 top-2 size-2 rounded-full bg-[#ba1a1a]"
                         />
                     </button>
                     <Avatar class="size-10 border border-[#bbcabf]">
@@ -212,10 +213,14 @@ function formatExpenseDate(date: string): string {
                         <h1
                             class="text-2xl font-semibold tracking-tight md:text-3xl"
                         >
-                            Categories
+                            {{ t('categories.title') }}
                         </h1>
                         <p class="mt-1 text-sm text-[#565e74] sm:hidden">
-                            {{ formatMoney(month_total) }} spent this month
+                            {{
+                                t('categories.spent_this_month', {
+                                    amount: formatMoney(month_total),
+                                })
+                            }}
                         </p>
                     </div>
                     <button
@@ -227,14 +232,18 @@ function formatExpenseDate(date: string): string {
                         "
                     >
                         <SlidersHorizontal class="size-4" />
-                        {{ showSpentCategoriesOnly ? 'Show all' : 'Filter' }}
+                        {{
+                            showSpentCategoriesOnly
+                                ? t('categories.show_all')
+                                : t('categories.filter')
+                        }}
                     </button>
                 </div>
 
                 <EmptyState
                     v-if="visibleCategories.length === 0"
-                    title="No category data available"
-                    description="No expenses were found for this month."
+                    :title="t('categories.empty')"
+                    :description="t('categories.empty_description')"
                 />
 
                 <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -244,7 +253,7 @@ function formatExpenseDate(date: string): string {
                         type="button"
                         :aria-pressed="selectedCategoryId === row.category.id"
                         :class="[
-                            'group relative overflow-hidden rounded-xl bg-white p-4 text-left shadow-[0_4px_6px_-1px_rgba(15,23,42,0.05),0_2px_4px_-2px_rgba(15,23,42,0.05)] transition-all duration-200 hover:-translate-y-1 hover:border-[#006c49]',
+                            'group relative overflow-hidden rounded-xl bg-white p-4 text-start shadow-[0_4px_6px_-1px_rgba(15,23,42,0.05),0_2px_4px_-2px_rgba(15,23,42,0.05)] transition-all duration-200 hover:-translate-y-1 hover:border-[#006c49]',
                             selectedCategoryId === row.category.id
                                 ? 'border-2 border-[#006c49]'
                                 : 'border border-[#bbcabf]',
@@ -253,7 +262,7 @@ function formatExpenseDate(date: string): string {
                     >
                         <span
                             v-if="selectedCategoryId === row.category.id"
-                            class="absolute -top-4 -right-4 size-24 rounded-bl-full bg-[#10b981]/20"
+                            class="absolute -end-4 -top-4 size-24 rounded-bl-full bg-[#10b981]/20 rtl:rounded-br-full rtl:rounded-bl-none"
                         />
                         <span
                             class="relative z-10 flex items-start justify-between gap-3"
@@ -282,8 +291,8 @@ function formatExpenseDate(date: string): string {
                                         {{ row.expense_count }}
                                         {{
                                             row.expense_count === 1
-                                                ? 'Transaction'
-                                                : 'Transactions'
+                                                ? t('categories.transaction')
+                                                : t('categories.transactions')
                                         }}
                                     </span>
                                 </span>
@@ -313,7 +322,11 @@ function formatExpenseDate(date: string): string {
                                 <span
                                     class="text-xs font-semibold text-[#6c7a71]"
                                 >
-                                    of {{ formatMoney(month_total) }}
+                                    {{
+                                        t('categories.of_total', {
+                                            amount: formatMoney(month_total),
+                                        })
+                                    }}
                                 </span>
                             </span>
                             <span
@@ -371,8 +384,10 @@ function formatExpenseDate(date: string): string {
                     <EmptyState
                         v-if="!selectedCategory.recent_expenses?.length"
                         class="m-4"
-                        title="No transactions yet"
-                        description="There are no expenses in this category for the selected month."
+                        :title="t('categories.no_transactions')"
+                        :description="
+                            t('categories.no_transactions_description')
+                        "
                     />
 
                     <ul v-else class="flex flex-col px-4">
@@ -420,7 +435,7 @@ function formatExpenseDate(date: string): string {
                             "
                             class="flex min-h-12 w-full items-center justify-center rounded-lg bg-[#e8f0e9] px-4 py-3 text-sm font-medium transition-colors hover:bg-[#dde4dd]"
                         >
-                            View All Transactions
+                            {{ t('categories.view_transactions') }}
                         </Link>
                     </div>
                 </div>

@@ -8,22 +8,12 @@ import DeleteUser from '@/components/DeleteUser.vue';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import { Spinner } from '@/components/ui/spinner';
+import { useTranslations } from '@/composables/useTranslations';
 import { logout } from '@/routes';
-import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            {
-                title: 'Profile settings',
-                href: edit(),
-            },
-        ],
-    },
-});
-
 const page = usePage();
+const { t } = useTranslations();
 const user = computed(() => page.props.auth.user);
 const nameParts = user.value.name.trim().split(/\s+/);
 const firstName = ref(nameParts.shift() ?? '');
@@ -53,7 +43,7 @@ function updateProfile(): void {
 
 <template>
     <div>
-        <Head title="Profile settings" />
+        <Head :title="t('profile.title')" />
 
         <main
             class="min-h-[calc(100vh-4rem)] bg-[#f4fbf4] px-5 py-8 text-[#161d19] md:px-10 md:py-10 dark:bg-[#161d19] dark:text-[#ebf3eb]"
@@ -63,13 +53,12 @@ function updateProfile(): void {
                     <h1
                         class="text-3xl font-bold tracking-[-0.02em] sm:text-4xl lg:text-5xl"
                     >
-                        Profile Settings
+                        {{ t('profile.title') }}
                     </h1>
                     <p
                         class="mt-2 text-base text-[#565e74] dark:text-[#bbcabf]"
                     >
-                        Manage your personal details, account security, and
-                        preferences.
+                        {{ t('profile.subtitle') }}
                     </p>
                 </header>
 
@@ -102,9 +91,9 @@ function updateProfile(): void {
                                 >
                                     <Spinner v-if="processing" class="size-6" />
                                     <Camera v-else class="size-6" />
-                                    <span class="sr-only"
-                                        >Change profile photo</span
-                                    >
+                                    <span class="sr-only">{{
+                                        t('profile.upload_photo')
+                                    }}</span>
                                 </label>
                                 <input
                                     id="profile-avatar"
@@ -132,7 +121,7 @@ function updateProfile(): void {
                             <span
                                 class="mt-4 inline-flex rounded-full bg-[#dae2fd] px-3 py-1 text-xs font-semibold text-[#3f465c] dark:bg-[#3f465c] dark:text-[#dae2fd]"
                             >
-                                Spendora Member
+                                {{ t('profile.member') }}
                             </span>
 
                             <Form
@@ -149,8 +138,8 @@ function updateProfile(): void {
                                 >
                                     {{
                                         processing
-                                            ? 'Removing photo...'
-                                            : 'Remove photo'
+                                            ? t('profile.removing_photo')
+                                            : t('profile.remove_photo')
                                     }}
                                 </button>
                             </Form>
@@ -162,7 +151,7 @@ function updateProfile(): void {
                             <h2
                                 class="border-b border-[#dde4dd] pb-3 text-xl font-semibold dark:border-[#3c4a42]"
                             >
-                                Account Actions
+                                {{ t('profile.account_actions') }}
                             </h2>
                             <div class="mt-4 flex flex-col gap-3">
                                 <Link
@@ -172,7 +161,7 @@ function updateProfile(): void {
                                     class="flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#dde4dd] px-4 text-sm font-semibold text-[#3c4a42] transition-colors hover:bg-[#bbcabf] dark:bg-[#3c4a42] dark:text-[#ebf3eb] dark:hover:bg-[#565e74]"
                                 >
                                     <LogOut class="size-5" />
-                                    Logout
+                                    {{ t('navigation.logout') }}
                                 </Link>
                                 <DeleteUser />
                             </div>
@@ -186,7 +175,7 @@ function updateProfile(): void {
                             <h2
                                 class="border-b border-[#dde4dd] pb-3 text-2xl font-semibold dark:border-[#3c4a42]"
                             >
-                                Personal Information
+                                {{ t('profile.personal_information') }}
                             </h2>
 
                             <form
@@ -197,7 +186,7 @@ function updateProfile(): void {
                                     <label
                                         for="first-name"
                                         class="text-sm font-medium text-[#3c4a42] dark:text-[#bbcabf]"
-                                        >First Name</label
+                                        >{{ t('profile.first_name') }}</label
                                     >
                                     <input
                                         id="first-name"
@@ -212,7 +201,7 @@ function updateProfile(): void {
                                     <label
                                         for="last-name"
                                         class="text-sm font-medium text-[#3c4a42] dark:text-[#bbcabf]"
-                                        >Last Name</label
+                                        >{{ t('profile.last_name') }}</label
                                     >
                                     <input
                                         id="last-name"
@@ -234,7 +223,7 @@ function updateProfile(): void {
                                     <label
                                         for="email"
                                         class="text-sm font-medium text-[#3c4a42] dark:text-[#bbcabf]"
-                                        >Email Address</label
+                                        >{{ t('profile.email') }}</label
                                     >
                                     <input
                                         id="email"
@@ -256,13 +245,13 @@ function updateProfile(): void {
                                     "
                                     class="rounded-lg bg-[#fff4dc] p-4 text-sm text-[#735c00] md:col-span-2 dark:bg-[#514619] dark:text-[#ffe178]"
                                 >
-                                    Your email address is unverified.
+                                    {{ t('profile.unverified') }}
                                     <Link
                                         :href="send()"
                                         as="button"
                                         class="font-semibold underline underline-offset-4"
                                     >
-                                        Re-send the verification email.
+                                        {{ t('profile.resend') }}
                                     </Link>
                                     <p
                                         v-if="
@@ -271,7 +260,7 @@ function updateProfile(): void {
                                         "
                                         class="mt-2 font-semibold text-[#006c49] dark:text-[#4edea3]"
                                     >
-                                        A new verification link has been sent.
+                                        {{ t('profile.verification_sent') }}
                                     </p>
                                 </div>
 
@@ -286,8 +275,8 @@ function updateProfile(): void {
                                     >
                                         {{
                                             profileForm.processing
-                                                ? 'Saving...'
-                                                : 'Save Changes'
+                                                ? t('common.saving')
+                                                : t('profile.save_changes')
                                         }}
                                     </button>
                                 </div>
@@ -303,7 +292,9 @@ function updateProfile(): void {
                                 <ShieldCheck
                                     class="size-6 text-[#006c49] dark:text-[#4edea3]"
                                 />
-                                <h2 class="text-2xl font-semibold">Security</h2>
+                                <h2 class="text-2xl font-semibold">
+                                    {{ t('profile.security') }}
+                                </h2>
                             </div>
 
                             <Form
@@ -322,13 +313,19 @@ function updateProfile(): void {
                                     <label
                                         for="current_password"
                                         class="text-sm font-medium text-[#3c4a42] dark:text-[#bbcabf]"
-                                        >Current Password</label
+                                        >{{
+                                            t('profile.current_password')
+                                        }}</label
                                     >
                                     <PasswordInput
                                         id="current_password"
                                         name="current_password"
                                         autocomplete="current-password"
-                                        placeholder="Enter your current password"
+                                        :placeholder="
+                                            t(
+                                                'profile.current_password_placeholder',
+                                            )
+                                        "
                                         class="min-h-12 border-[#bbcabf] bg-[#f4fbf4] dark:border-[#6c7a71] dark:bg-[#161d19]"
                                     />
                                     <InputError
@@ -342,13 +339,19 @@ function updateProfile(): void {
                                         <label
                                             for="password"
                                             class="text-sm font-medium text-[#3c4a42] dark:text-[#bbcabf]"
-                                            >New Password</label
+                                            >{{
+                                                t('profile.new_password')
+                                            }}</label
                                         >
                                         <PasswordInput
                                             id="password"
                                             name="password"
                                             autocomplete="new-password"
-                                            placeholder="Enter a new password"
+                                            :placeholder="
+                                                t(
+                                                    'profile.new_password_placeholder',
+                                                )
+                                            "
                                             class="min-h-12 border-[#bbcabf] bg-[#f4fbf4] dark:border-[#6c7a71] dark:bg-[#161d19]"
                                         />
                                         <InputError
@@ -359,13 +362,19 @@ function updateProfile(): void {
                                         <label
                                             for="password_confirmation"
                                             class="text-sm font-medium text-[#3c4a42] dark:text-[#bbcabf]"
-                                            >Confirm Password</label
+                                            >{{
+                                                t('profile.confirm_password')
+                                            }}</label
                                         >
                                         <PasswordInput
                                             id="password_confirmation"
                                             name="password_confirmation"
                                             autocomplete="new-password"
-                                            placeholder="Confirm your new password"
+                                            :placeholder="
+                                                t(
+                                                    'profile.confirm_password_placeholder',
+                                                )
+                                            "
                                             class="min-h-12 border-[#bbcabf] bg-[#f4fbf4] dark:border-[#6c7a71] dark:bg-[#161d19]"
                                         />
                                         <InputError
@@ -384,8 +393,8 @@ function updateProfile(): void {
                                     >
                                         {{
                                             processing
-                                                ? 'Updating...'
-                                                : 'Update Password'
+                                                ? t('profile.updating')
+                                                : t('profile.update_password')
                                         }}
                                     </button>
                                 </div>
@@ -398,7 +407,7 @@ function updateProfile(): void {
                             <h2
                                 class="border-b border-[#dde4dd] pb-3 text-2xl font-semibold dark:border-[#3c4a42]"
                             >
-                                Preferences
+                                {{ t('profile.preferences') }}
                             </h2>
                             <Form
                                 v-bind="ProfileController.updateLanguage.form()"
@@ -409,7 +418,7 @@ function updateProfile(): void {
                                     <label
                                         for="language"
                                         class="text-sm font-medium text-[#3c4a42] dark:text-[#bbcabf]"
-                                        >Language</label
+                                        >{{ t('profile.language') }}</label
                                     >
                                     <select
                                         id="language"
@@ -421,13 +430,13 @@ function updateProfile(): void {
                                             value="en"
                                             :selected="user.language === 'en'"
                                         >
-                                            English
+                                            {{ t('profile.english') }}
                                         </option>
                                         <option
                                             value="ar"
                                             :selected="user.language === 'ar'"
                                         >
-                                            Arabic
+                                            {{ t('profile.arabic') }}
                                         </option>
                                     </select>
                                     <InputError :message="errors.language" />
@@ -440,8 +449,8 @@ function updateProfile(): void {
                                 >
                                     {{
                                         processing
-                                            ? 'Saving...'
-                                            : 'Save Preference'
+                                            ? t('common.saving')
+                                            : t('profile.save_preference')
                                     }}
                                 </button>
                             </Form>

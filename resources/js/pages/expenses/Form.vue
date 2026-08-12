@@ -3,22 +3,9 @@ import { Form, Head, Link } from '@inertiajs/vue3';
 import InputError from '@/components/InputError.vue';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
+import { useTranslations } from '@/composables/useTranslations';
+import { index, store, update } from '@/routes/expenses';
 import type { CategoryPayload, ExpensePayload } from '@/types/spendora';
-
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            {
-                title: 'Expenses',
-                href: '/expenses',
-            },
-            {
-                title: 'Form',
-                href: '/expenses/create',
-            },
-        ],
-    },
-});
 
 const props = defineProps<{
     expense: ExpensePayload | null;
@@ -26,34 +13,38 @@ const props = defineProps<{
 }>();
 
 const isEdit = Boolean(props.expense);
+const { t } = useTranslations();
 </script>
 
 <template>
-    <Head :title="isEdit ? 'Edit expense' : 'Add expense'" />
+    <Head
+        :title="isEdit ? t('expenses.edit_title') : t('expenses.add_title')"
+    />
 
     <div class="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 p-4 md:p-6">
         <div>
             <Link
-                href="/expenses"
+                :href="index()"
                 class="text-sm font-medium text-[#006c49] hover:underline"
             >
-                Back to expenses
+                {{ t('expenses.back') }}
             </Link>
             <h1 class="mt-2 text-2xl font-semibold text-[#161d19]">
-                {{ isEdit ? 'Edit expense' : 'Add expense' }}
+                {{
+                    isEdit ? t('expenses.edit_title') : t('expenses.add_title')
+                }}
             </h1>
             <p class="mt-1 text-sm text-[#3c4a42]">
                 {{
                     isEdit
-                        ? 'Update the expense details below.'
-                        : 'Record a new expense with category, date, and amount.'
+                        ? t('expenses.edit_description')
+                        : t('expenses.add_description')
                 }}
             </p>
         </div>
 
         <Form
-            :action="isEdit ? `/expenses/${expense!.id}` : '/expenses'"
-            :method="isEdit ? 'put' : 'post'"
+            v-bind="isEdit ? update.form(expense!) : store.form()"
             class="space-y-4 rounded-xl border border-[#bbcabf] bg-white p-5 md:p-6"
             v-slot="{ errors, processing }"
         >
@@ -61,7 +52,7 @@ const isEdit = Boolean(props.expense);
                 <label
                     for="category_id"
                     class="text-sm font-medium text-[#161d19]"
-                    >Category</label
+                    >{{ t('common.category') }}</label
                 >
                 <select
                     id="category_id"
@@ -71,7 +62,7 @@ const isEdit = Boolean(props.expense);
                     :aria-invalid="Boolean(errors.category_id)"
                 >
                     <option value="" disabled :selected="!expense">
-                        Select a category
+                        {{ t('expenses.select_category') }}
                     </option>
                     <option
                         v-for="category in categories"
@@ -89,7 +80,7 @@ const isEdit = Boolean(props.expense);
                 <label
                     for="expense_date"
                     class="text-sm font-medium text-[#161d19]"
-                    >Date</label
+                    >{{ t('common.date') }}</label
                 >
                 <Input
                     id="expense_date"
@@ -110,14 +101,14 @@ const isEdit = Boolean(props.expense);
                 <label
                     for="description"
                     class="text-sm font-medium text-[#161d19]"
-                    >Description</label
+                    >{{ t('common.description') }}</label
                 >
                 <Input
                     id="description"
                     type="text"
                     name="description"
                     :default-value="expense?.description ?? ''"
-                    placeholder="Lunch, groceries, transport…"
+                    :placeholder="t('expenses.description_placeholder')"
                     class="h-12 border-[#bbcabf]"
                     :aria-invalid="Boolean(errors.description)"
                 />
@@ -125,8 +116,10 @@ const isEdit = Boolean(props.expense);
             </div>
 
             <div class="flex flex-col gap-1">
-                <label for="amount" class="text-sm font-medium text-[#161d19]"
-                    >Amount</label
+                <label
+                    for="amount"
+                    class="text-sm font-medium text-[#161d19]"
+                    >{{ t('common.amount') }}</label
                 >
                 <Input
                     id="amount"
@@ -153,18 +146,18 @@ const isEdit = Boolean(props.expense);
                     {{
                         processing
                             ? isEdit
-                                ? 'Updating...'
-                                : 'Adding...'
+                                ? t('expenses.updating')
+                                : t('expenses.adding')
                             : isEdit
-                              ? 'Update expense'
-                              : 'Add expense'
+                              ? t('expenses.update')
+                              : t('common.add_expense')
                     }}
                 </button>
                 <Link
-                    href="/expenses"
+                    :href="index()"
                     class="text-sm font-medium text-[#3c4a42] hover:text-[#161d19]"
                 >
-                    Cancel
+                    {{ t('common.cancel') }}
                 </Link>
             </div>
         </Form>

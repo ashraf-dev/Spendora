@@ -95,7 +95,7 @@ class ExpenseController extends Controller
 
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => __('Expense created.'),
+            'message' => __('ui.flash.expense_created'),
         ]);
 
         return to_route('expenses.index');
@@ -123,7 +123,7 @@ class ExpenseController extends Controller
 
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => __('Expense updated.'),
+            'message' => __('ui.flash.expense_updated'),
         ]);
 
         return to_route('expenses.index');
@@ -137,7 +137,7 @@ class ExpenseController extends Controller
 
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => __('Expense deleted.'),
+            'message' => __('ui.flash.expense_deleted'),
         ]);
 
         return to_route('expenses.index');

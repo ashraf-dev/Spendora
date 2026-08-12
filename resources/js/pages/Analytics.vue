@@ -4,22 +4,10 @@ import { computed } from 'vue';
 import EmptyState from '@/components/spendora/EmptyState.vue';
 import MonthNavigator from '@/components/spendora/MonthNavigator.vue';
 import StatCard from '@/components/spendora/StatCard.vue';
+import { useTranslations } from '@/composables/useTranslations';
 import { formatMoney, formatPercent } from '@/lib/format';
-import type {
-    CategoryTotalRow,
-    MonthNavigation,
-} from '@/types/spendora';
-
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            {
-                title: 'Analytics',
-                href: '/analytics',
-            },
-        ],
-    },
-});
+import { analytics } from '@/routes';
+import type { CategoryTotalRow, MonthNavigation } from '@/types/spendora';
 
 const props = defineProps<{
     month: number;
@@ -36,12 +24,10 @@ const props = defineProps<{
 }>();
 
 const chartBarMaxHeightPx = 160;
+const { t } = useTranslations();
 
 const maxDaily = computed(() =>
-    Math.max(
-        ...props.daily_totals.map((day) => Number(day.total)),
-        0,
-    ),
+    Math.max(...props.daily_totals.map((day) => Number(day.total)), 0),
 );
 
 const monthChange = computed(() => {
@@ -75,16 +61,18 @@ function dayNumber(date: string): string {
 </script>
 
 <template>
-    <Head title="Analytics" />
+    <Head :title="t('analytics.title')" />
 
     <div class="flex flex-1 flex-col gap-6 p-4 md:p-6">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div
+            class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
+        >
             <div>
                 <h1 class="text-2xl font-semibold text-[#161d19]">
-                    Analytics
+                    {{ t('analytics.title') }}
                 </h1>
                 <p class="mt-1 text-sm text-[#3c4a42]">
-                    Monthly totals, trends, and category breakdown.
+                    {{ t('analytics.subtitle') }}
                 </p>
             </div>
             <div class="w-full sm:max-w-xs">
@@ -92,16 +80,20 @@ function dayNumber(date: string): string {
                     :month="month"
                     :year="year"
                     :navigation="navigation"
-                    base-url="/analytics"
+                    :base-url="analytics.url()"
                 />
             </div>
         </div>
 
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <StatCard
-                label="Selected month"
+                :label="t('analytics.month_total')"
                 :value="formatMoney(selected_month_total)"
-                :hint="`${formatPercent(monthChange)} vs previous month`"
+                :hint="
+                    t('analytics.change', {
+                        percent: formatPercent(monthChange),
+                    })
+                "
                 :tone="
                     monthChange > 0
                         ? 'negative'
@@ -111,46 +103,47 @@ function dayNumber(date: string): string {
                 "
             />
             <StatCard
-                label="Previous month"
+                :label="t('analytics.previous_month')"
                 :value="formatMoney(previous_month_total)"
             />
             <StatCard
-                label="Year to date"
+                :label="t('analytics.year_total')"
                 :value="formatMoney(current_year_total)"
             />
-            <StatCard label="Expense count" :value="String(expense_count)" />
             <StatCard
-                label="Highest expense"
+                :label="t('analytics.expense_count')"
+                :value="String(expense_count)"
+            />
+            <StatCard
+                :label="t('analytics.highest_expense')"
                 :value="formatMoney(highest_expense)"
             />
             <StatCard
-                label="Average expense"
+                :label="t('analytics.average_expense')"
                 :value="formatMoney(average_expense)"
             />
         </div>
 
-        <section
-            class="rounded-xl border border-[#bbcabf] bg-white p-4 md:p-5"
-        >
+        <section class="rounded-xl border border-[#bbcabf] bg-white p-4 md:p-5">
             <h2 class="text-lg font-semibold text-[#161d19]">
-                Daily spending
+                {{ t('analytics.daily_spending') }}
             </h2>
             <p class="mt-1 text-sm text-[#3c4a42]">
-                Totals for each day in the selected month.
+                {{ t('analytics.subtitle') }}
             </p>
 
             <EmptyState
                 v-if="activeDays.length === 0"
                 class="mt-6"
-                title="No expenses found for this month"
-                description="Add expenses to see daily trends."
+                :title="t('analytics.no_daily')"
+                :description="t('analytics.no_daily_description')"
             />
 
             <div
                 v-else
                 class="mt-6 flex h-52 items-end gap-1 overflow-x-auto pb-1"
                 role="img"
-                :aria-label="`Daily spending for ${month}/${year}`"
+                :aria-label="t('analytics.daily_spending')"
             >
                 <div
                     v-for="day in daily_totals"
@@ -174,11 +167,9 @@ function dayNumber(date: string): string {
             </div>
         </section>
 
-        <section
-            class="rounded-xl border border-[#bbcabf] bg-white p-4 md:p-5"
-        >
+        <section class="rounded-xl border border-[#bbcabf] bg-white p-4 md:p-5">
             <h2 class="text-lg font-semibold text-[#161d19]">
-                By category
+                {{ t('analytics.category_breakdown') }}
             </h2>
 
             <EmptyState
@@ -188,7 +179,8 @@ function dayNumber(date: string): string {
                     )
                 "
                 class="mt-6"
-                title="No category data available"
+                :title="t('analytics.no_categories')"
+                :description="t('analytics.no_categories_description')"
             />
 
             <ul v-else class="mt-4 space-y-4">

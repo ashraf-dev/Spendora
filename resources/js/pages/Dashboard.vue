@@ -5,24 +5,13 @@ import { computed } from 'vue';
 import EmptyState from '@/components/spendora/EmptyState.vue';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useInitials } from '@/composables/useInitials';
+import { useTranslations } from '@/composables/useTranslations';
 import { formatMoney, formatPercent } from '@/lib/format';
-import { dashboard } from '@/routes';
 import {
     create as createExpense,
     index as expensesIndex,
 } from '@/routes/expenses';
 import type { ExpensePayload } from '@/types/spendora';
-
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            {
-                title: 'Dashboard',
-                href: dashboard(),
-            },
-        ],
-    },
-});
 
 const props = defineProps<{
     latest_expenses: ExpensePayload[];
@@ -41,6 +30,7 @@ const props = defineProps<{
 
 const page = usePage();
 const { getInitials } = useInitials();
+const { locale, t } = useTranslations();
 
 const user = computed(() => page.props.auth.user);
 const firstName = computed(() => user.value.name.trim().split(/\s+/u)[0]);
@@ -48,14 +38,14 @@ const greeting = computed(() => {
     const hour = new Date().getHours();
 
     if (hour < 12) {
-        return 'Good morning';
+        return t('dashboard.morning');
     }
 
     if (hour < 18) {
-        return 'Good afternoon';
+        return t('dashboard.afternoon');
     }
 
-    return 'Good evening';
+    return t('dashboard.evening');
 });
 
 const todayAmount = computed(() => Number(props.totals.today));
@@ -73,7 +63,7 @@ function comparisonWidth(amount: number): string {
 }
 
 function formatExpenseDate(date: string): string {
-    return new Intl.DateTimeFormat(undefined, {
+    return new Intl.DateTimeFormat(locale.value, {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -82,7 +72,7 @@ function formatExpenseDate(date: string): string {
 </script>
 
 <template>
-    <Head title="Dashboard" />
+    <Head :title="t('dashboard.title')" />
 
     <div
         class="min-h-full flex-1 bg-[#f4fbf4] px-5 py-8 font-sans text-[#161d19] md:px-10"
@@ -96,7 +86,7 @@ function formatExpenseDate(date: string): string {
                         {{ greeting }}, {{ firstName }}
                     </h1>
                     <p class="mt-1 text-sm text-[#565e74] md:text-base">
-                        Here's a look at your finances today.
+                        {{ t('dashboard.subtitle') }}
                     </p>
                 </div>
 
@@ -104,7 +94,7 @@ function formatExpenseDate(date: string): string {
                     <button
                         type="button"
                         class="inline-flex size-11 items-center justify-center rounded-full border border-[#bbcabf] bg-white text-[#161d19] transition-colors hover:bg-[#e8f0e9] md:size-12"
-                        aria-label="Notifications"
+                        :aria-label="t('common.notifications')"
                     >
                         <Bell class="size-5" />
                     </button>
@@ -131,7 +121,7 @@ function formatExpenseDate(date: string): string {
                     class="group relative overflow-hidden rounded-2xl border border-[#bbcabf] bg-white p-6 shadow-[0_4px_6px_-1px_rgba(15,23,42,0.05),0_2px_4px_-2px_rgba(15,23,42,0.05)] lg:col-span-2"
                 >
                     <div
-                        class="absolute -top-20 -right-20 size-64 rounded-full bg-[#10b981]/10 blur-3xl transition-opacity duration-500 group-hover:opacity-80"
+                        class="absolute -end-20 -top-20 size-64 rounded-full bg-[#10b981]/10 blur-3xl transition-opacity duration-500 group-hover:opacity-80"
                     />
 
                     <div
@@ -141,7 +131,7 @@ function formatExpenseDate(date: string): string {
                             <p
                                 class="text-sm font-medium tracking-wider text-[#565e74] uppercase"
                             >
-                                Total spending this month
+                                {{ t('dashboard.month_spending') }}
                             </p>
                             <p
                                 class="mt-2 text-4xl font-bold tracking-tight text-[#161d19] md:text-5xl"
@@ -167,7 +157,7 @@ function formatExpenseDate(date: string): string {
                                     }}
                                 </span>
                                 <span class="text-sm text-[#565e74]">
-                                    vs last month
+                                    {{ t('dashboard.vs_last_month') }}
                                 </span>
                             </div>
                         </div>
@@ -177,7 +167,7 @@ function formatExpenseDate(date: string): string {
                             class="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-lg bg-[#006c49] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#005236]"
                         >
                             <Plus class="size-5" />
-                            Add Expense
+                            {{ t('common.add_expense') }}
                         </Link>
                     </div>
                 </section>
@@ -189,7 +179,7 @@ function formatExpenseDate(date: string): string {
                         <p
                             class="text-sm font-medium tracking-wider text-[#565e74] uppercase"
                         >
-                            Today vs same day last year
+                            {{ t('dashboard.today_comparison') }}
                         </p>
                         <span
                             class="shrink-0 rounded-full bg-[#eef6ee] px-2.5 py-1 text-xs font-semibold text-[#006c49]"
@@ -207,7 +197,9 @@ function formatExpenseDate(date: string): string {
                             <div
                                 class="mb-2 flex items-center justify-between gap-4"
                             >
-                                <span class="text-sm font-medium">Today</span>
+                                <span class="text-sm font-medium">{{
+                                    t('dashboard.today')
+                                }}</span>
                                 <span class="text-sm font-semibold">
                                     {{ formatMoney(totals.today) }}
                                 </span>
@@ -231,7 +223,7 @@ function formatExpenseDate(date: string): string {
                                 <span
                                     class="text-sm font-medium text-[#565e74]"
                                 >
-                                    Last year
+                                    {{ t('dashboard.last_year') }}
                                 </span>
                                 <span
                                     class="text-sm font-medium text-[#565e74]"
@@ -263,49 +255,52 @@ function formatExpenseDate(date: string): string {
                     <h2
                         class="text-xl font-semibold tracking-tight md:text-2xl"
                     >
-                        Recent Expenses
+                        {{ t('dashboard.recent') }}
                     </h2>
                     <Link
                         :href="expensesIndex()"
                         class="text-sm font-medium text-[#006c49] underline-offset-4 hover:underline"
                     >
-                        View All
+                        {{ t('dashboard.view_all') }}
                     </Link>
                 </div>
 
                 <EmptyState
                     v-if="latest_expenses.length === 0"
                     class="m-6"
-                    title="No recent expenses"
-                    description="Add your first expense to see it here."
+                    :title="t('dashboard.no_expenses')"
+                    :description="t('dashboard.no_expenses_description')"
                 />
 
                 <div v-else class="overflow-x-auto">
                     <table
-                        class="w-full min-w-[720px] border-collapse text-left"
+                        class="w-full min-w-[720px] border-collapse text-start"
                     >
                         <thead>
                             <tr class="border-b border-[#bbcabf] bg-[#f4fbf4]">
-                                <th class="w-20 px-6 py-4" aria-label="Type" />
+                                <th
+                                    class="w-20 px-6 py-4"
+                                    :aria-label="t('common.type')"
+                                />
                                 <th
                                     class="px-6 py-4 text-xs font-semibold tracking-wider text-[#565e74] uppercase"
                                 >
-                                    Transaction
+                                    {{ t('dashboard.transaction') }}
                                 </th>
                                 <th
                                     class="px-6 py-4 text-xs font-semibold tracking-wider text-[#565e74] uppercase"
                                 >
-                                    Category
+                                    {{ t('common.category') }}
                                 </th>
                                 <th
                                     class="px-6 py-4 text-xs font-semibold tracking-wider text-[#565e74] uppercase"
                                 >
-                                    Date
+                                    {{ t('common.date') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-right text-xs font-semibold tracking-wider text-[#565e74] uppercase"
+                                    class="px-6 py-4 text-end text-xs font-semibold tracking-wider text-[#565e74] uppercase"
                                 >
-                                    Amount
+                                    {{ t('common.amount') }}
                                 </th>
                             </tr>
                         </thead>
@@ -326,14 +321,17 @@ function formatExpenseDate(date: string): string {
                                     {{
                                         expense.description ||
                                         expense.category?.name ||
-                                        'Expense'
+                                        t('common.expense')
                                     }}
                                 </td>
                                 <td class="px-6 py-4">
                                     <span
                                         class="inline-flex rounded-full bg-[#e8f0e9] px-3 py-1 text-xs font-semibold text-[#3c4a42]"
                                     >
-                                        {{ expense.category?.name || 'Other' }}
+                                        {{
+                                            expense.category?.name ||
+                                            t('common.other')
+                                        }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-[#565e74]">
@@ -342,7 +340,7 @@ function formatExpenseDate(date: string): string {
                                     }}
                                 </td>
                                 <td
-                                    class="px-6 py-4 text-right font-semibold whitespace-nowrap"
+                                    class="px-6 py-4 text-end font-semibold whitespace-nowrap"
                                 >
                                     -{{ formatMoney(expense.amount) }}
                                 </td>

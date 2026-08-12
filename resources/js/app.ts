@@ -1,14 +1,16 @@
-import { createInertiaApp } from '@inertiajs/vue3';
+import { createInertiaApp, router } from '@inertiajs/vue3';
 import { initializeTheme } from '@/composables/useAppearance';
 import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { initializeFlashToast } from '@/lib/flashToast';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
-
 createInertiaApp({
-    title: (title) => (title ? `${title} - ${appName}` : appName),
+    title: (title, page) => {
+        const appName = String(page.props.name || 'Spendora');
+
+        return title ? `${title} - ${appName}` : appName;
+    },
     layout: (name) => {
         switch (true) {
             case name === 'Welcome':
@@ -33,3 +35,16 @@ initializeTheme();
 
 // This will listen for flash toast data from the server...
 initializeFlashToast();
+
+function syncDocumentLocale(): void {
+    const locale = document.documentElement.lang || 'en';
+    document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
+}
+
+router.on('navigate', (event) => {
+    const locale = String(event.detail.page.props.locale ?? 'en');
+    document.documentElement.lang = locale;
+    syncDocumentLocale();
+});
+
+syncDocumentLocale();

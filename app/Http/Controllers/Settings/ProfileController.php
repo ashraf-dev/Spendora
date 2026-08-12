@@ -41,7 +41,7 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Profile updated.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('ui.flash.profile_updated')]);
 
         return to_route('profile.edit');
     }
@@ -57,7 +57,7 @@ class ProfileController extends Controller
 
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => __('Language updated.'),
+            'message' => __('ui.flash.language_updated'),
         ]);
 
         return to_route('profile.edit');
@@ -76,7 +76,7 @@ class ProfileController extends Controller
 
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => __('Avatar updated.'),
+            'message' => __('ui.flash.avatar_updated'),
         ]);
 
         return to_route('profile.edit');
@@ -93,7 +93,7 @@ class ProfileController extends Controller
 
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => __('Avatar removed.'),
+            'message' => __('ui.flash.avatar_removed'),
         ]);
 
         return to_route('profile.edit');
