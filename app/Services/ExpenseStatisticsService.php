@@ -8,13 +8,19 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 class ExpenseStatisticsService
 {
     /**
-     * @return array<string, mixed>
+     * @return array{
+     *     latest_expenses: Collection<int, Expense>,
+     *     totals: array{today: string, current_month: string, previous_month: string, current_year: string, same_day_last_year: string},
+     *     comparisons: array{month_over_month_percentage: float, today_vs_same_day_last_year_percentage: float},
+     *     current_month_by_category: Collection<int, array{category: Category, total_amount: string, expense_count: int}>
+     * }
      */
     public function dashboard(User $user): array
     {
@@ -64,7 +70,18 @@ class ExpenseStatisticsService
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array{
+     *     month: int,
+     *     year: int,
+     *     selected_month_total: string,
+     *     previous_month_total: string,
+     *     current_year_total: string,
+     *     expense_count: int,
+     *     highest_expense: string,
+     *     average_expense: string,
+     *     daily_totals: list<array{date: string, total: string}>,
+     *     category_totals: Collection<int, array{category: Category, total_amount: string, expense_count: int}>
+     * }
      */
     public function monthly(User $user, int $month, int $year): array
     {
@@ -102,7 +119,18 @@ class ExpenseStatisticsService
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array{
+     *     month: int,
+     *     year: int,
+     *     month_total: string,
+     *     categories: Collection<int, array{
+     *         category: Category,
+     *         total_amount: string,
+     *         expense_count: int,
+     *         percentage: float,
+     *         recent_expenses: EloquentCollection<int, Expense>
+     *     }>
+     * }
      */
     public function categories(User $user, int $month, int $year): array
     {
@@ -141,7 +169,9 @@ class ExpenseStatisticsService
                 'total_amount' => $total,
                 'expense_count' => $count,
                 'percentage' => $this->percentageOfTotal($total, $monthTotal),
-                'recent_expenses' => ($recentByCategory->get($category->id) ?? collect())->take(5)->values(),
+                'recent_expenses' => ($recentByCategory->get($category->id) ?? (new Expense)->newCollection())
+                    ->take(5)
+                    ->values(),
             ];
         })->values();
 
@@ -154,7 +184,18 @@ class ExpenseStatisticsService
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array{
+     *     category: Category,
+     *     month: int,
+     *     year: int,
+     *     selected_month_total: string,
+     *     expense_count: int,
+     *     expenses: LengthAwarePaginator<int, Expense>,
+     *     navigation: array{
+     *         previous_month: array{month: int, year: int},
+     *         next_month: array{month: int, year: int}
+     *     }
+     * }
      */
     public function categoryDetails(
         User $user,
@@ -174,7 +215,6 @@ class ExpenseStatisticsService
         $total = $this->formatAmount((clone $query)->sum('amount'));
         $count = (clone $query)->count();
 
-        /** @var LengthAwarePaginator $expenses */
         $expenses = $query
             ->with('category')
             ->orderByDesc('expense_date')
@@ -229,14 +269,10 @@ class ExpenseStatisticsService
             ->selectRaw('COALESCE(SUM(amount), 0) as total')
             ->groupBy('expense_date')
             ->get()
-            ->mapWithKeys(function ($row) {
-                $date = $row->expense_date;
-
-                $key = $date instanceof CarbonInterface
-                    ? $date->toDateString()
-                    : (string) $date;
-
-                return [$key => $row->total];
+            ->mapWithKeys(function (Expense $expense) {
+                return [
+                    $expense->expense_date->toDateString() => $expense->getAttribute('total'),
+                ];
             });
 
         $daily = [];

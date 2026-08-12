@@ -5,7 +5,7 @@ namespace App\Support;
 use App\Http\Resources\Api\V1\CategoryResource;
 use App\Models\Category;
 use App\Models\Expense;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 class SpendoraPayload
@@ -24,10 +24,13 @@ class SpendoraPayload
      */
     public static function categories(iterable $categories): array
     {
-        return collect($categories)
-            ->map(fn (Category $category) => self::category($category))
-            ->values()
-            ->all();
+        $payload = [];
+
+        foreach ($categories as $category) {
+            $payload[] = self::category($category);
+        }
+
+        return $payload;
     }
 
     /**
@@ -38,10 +41,10 @@ class SpendoraPayload
         return [
             'id' => $expense->id,
             'category_id' => $expense->category_id,
-            'expense_date' => $expense->expense_date?->toDateString(),
+            'expense_date' => $expense->expense_date->toDateString(),
             'description' => $expense->description,
             'amount' => $expense->amount,
-            'category' => $expense->relationLoaded('category') && $expense->category !== null
+            'category' => $expense->relationLoaded('category')
                 ? self::category($expense->category)
                 : null,
             'created_at' => $expense->created_at,
@@ -55,13 +58,17 @@ class SpendoraPayload
      */
     public static function expenses(iterable $expenses): array
     {
-        return collect($expenses)
-            ->map(fn (Expense $expense) => self::expense($expense))
-            ->values()
-            ->all();
+        $payload = [];
+
+        foreach ($expenses as $expense) {
+            $payload[] = self::expense($expense);
+        }
+
+        return $payload;
     }
 
     /**
+     * @param  LengthAwarePaginator<int, Expense>  $paginator
      * @return array{data: list<array<string, mixed>>, meta: array<string, int>}
      */
     public static function paginatedExpenses(LengthAwarePaginator $paginator): array

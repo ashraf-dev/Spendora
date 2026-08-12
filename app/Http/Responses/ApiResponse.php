@@ -6,9 +6,6 @@ use Illuminate\Http\JsonResponse;
 
 class ApiResponse
 {
-    /**
-     * @param  array<string, mixed>|null  $data
-     */
     public static function success(
         mixed $data = null,
         ?string $message = null,

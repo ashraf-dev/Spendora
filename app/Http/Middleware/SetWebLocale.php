@@ -21,7 +21,7 @@ class SetWebLocale
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $locale = $request->user()?->language
+        $locale = $request->user()->language
             ?? $request->query('locale', config('app.locale', 'en'));
 
         if (is_string($locale) && in_array($locale, self::SUPPORTED_LOCALES, true)) {

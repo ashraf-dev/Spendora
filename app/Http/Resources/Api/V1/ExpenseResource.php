@@ -2,11 +2,12 @@
 
 namespace App\Http\Resources\Api\V1;
 
+use App\Models\Expense;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\Expense
+ * @mixin Expense
  */
 class ExpenseResource extends JsonResource
 {
@@ -18,7 +19,7 @@ class ExpenseResource extends JsonResource
         return [
             'id' => $this->id,
             'category_id' => $this->category_id,
-            'expense_date' => $this->expense_date?->toDateString(),
+            'expense_date' => $this->expense_date->toDateString(),
             'description' => $this->description,
             'amount' => $this->amount,
             'category' => new CategoryResource($this->whenLoaded('category')),

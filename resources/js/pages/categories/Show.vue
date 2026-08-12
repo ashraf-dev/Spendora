@@ -82,10 +82,7 @@ function goToPage(page: number): void {
                 label="Month total"
                 :value="formatMoney(selected_month_total)"
             />
-            <StatCard
-                label="Expenses"
-                :value="String(expense_count)"
-            />
+            <StatCard label="Expenses" :value="String(expense_count)" />
         </div>
 
         <section
